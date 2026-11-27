@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VentasPro · Sistema de Ventas</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --panel: #ffffff;
+      --text: #1e2533;
+      --muted: #6b7486;
+      --line: #e6e9f0;
+      --primary: #4f46e5;
+      --primary-dark: #3f37c9;
+      --primary-soft: #eef0ff;
+      --side: #151a2d;
+      --side-text: #a9b0c6;
+      --ok: #16a34a;
+      --ok-soft: #e8f7ee;
+      --warn: #d97706;
+      --warn-soft: #fff4e0;
+      --danger: #dc2626;
+      --danger-soft: #fdecec;
+      --radius: 14px;
+      --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 4px 16px rgba(16, 24, 40, .06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+    button { font: inherit; cursor: pointer; border: none; }
+    input, select { font: inherit; color: var(--text); }
+    .oculto { display: none !important; }
+
+    /* ---------- Login ---------- */
+    .login { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr; }
+    .login-brand {
+      background: radial-gradient(circle at 20% 20%, #6d64ff 0, transparent 45%),
+                  radial-gradient(circle at 80% 80%, #22c1c3 0, transparent 40%),
+                  linear-gradient(135deg, #2a2580, #151a2d);
+      color: #fff; padding: 56px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; }
+    .logo-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,.18); display: grid; place-items: center; }
+    .login-brand h2 { font-size: 38px; line-height: 1.15; max-width: 420px; }
+    .login-brand p { color: rgba(255,255,255,.75); margin-top: 14px; max-width: 400px; line-height: 1.6; }
+    .login-brand small { color: rgba(255,255,255,.55); }
+    .login-form-wrap { display: grid; place-items: center; padding: 32px; }
+    .login-form { width: 100%; max-width: 360px; }
+    .login-form h1 { font-size: 26px; margin-bottom: 6px; }
+    .login-form .sub { color: var(--muted); margin-bottom: 28px; }
+    .hint { margin-top: 18px; background: var(--primary-soft); color: var(--primary-dark); padding: 10px 12px; border-radius: 10px; font-size: 13px; }
+
+    /* ---------- Campos y botones ---------- */
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+    .field input, .field select {
+      height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; outline: none; transition: border .15s, box-shadow .15s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+    .btn { height: 42px; padding: 0 18px; border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, transform .05s; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-light { background: var(--primary-soft); color: var(--primary-dark); }
+    .btn-light:hover { background: #e2e5ff; }
+    .btn-block { width: 100%; }
+    .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 8px; background: transparent; color: var(--muted); }
+    .btn-icon:hover { background: var(--danger-soft); color: var(--danger); }
+    .error-text { color: var(--danger); font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+    /* ---------- Layout ---------- */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+    aside { background: var(--side); color: var(--side-text); padding: 22px 14px; display: flex; flex-direction: column; }
+    aside .logo { color: #fff; padding: 0 10px 26px; font-size: 18px; }
+    aside .logo-icon { background: var(--primary); }
+    .nav-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding: 0 12px 8px; color: #6c7390; }
+    nav button {
+      width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; background: transparent; color: var(--side-text); text-align: left; margin-bottom: 4px; font-weight: 500;
+    }
+    nav button:hover { background: rgba(255,255,255,.06); color: #fff; }
+    nav button.activo { background: rgba(79,70,229,.22); color: #fff; }
+    nav svg, .logo-icon svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .side-footer { margin-top: auto; padding: 12px; font-size: 12px; color: #6c7390; }
+
+    .content { display: flex; flex-direction: column; min-width: 0; }
+    .topbar { height: 68px; background: var(--panel); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; }
+    .topbar h1 { font-size: 19px; }
+    .topbar .sub { color: var(--muted); font-size: 12.5px; }
+    .user { display: flex; align-items: center; gap: 12px; }
+    .badge-version { background: var(--primary-soft); color: var(--primary-dark); padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #22c1c3); color: #fff; display: grid; place-items: center; font-weight: 700; }
+    .user-name { font-weight: 600; font-size: 13.5px; }
+    .logout { font-size: 12px; color: var(--muted); background: none; padding: 0; }
+    .logout:hover { color: var(--danger); }
+    main { padding: 26px 28px 40px; }
+
+    /* ---------- Tarjetas ---------- */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 22px; }
+    .stat { background: var(--panel); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); display: flex; gap: 14px; align-items: center; }
+    .stat-icon { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; }
+    .stat-icon svg { width: 22px; height: 22px; }
+    .stat .valor { font-size: 22px; font-weight: 700; }
+    .stat .etiqueta { color: var(--muted); font-size: 12.5px; }
+    .i-indigo { background: var(--primary-soft); color: var(--primary); }
+    .i-teal { background: #e3f8f8; color: #0f9a9c; }
+    .i-amber { background: var(--warn-soft); color: var(--warn); }
+    .i-green { background: var(--ok-soft); color: var(--ok); }
+
+    .card { background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; }
+    .card-head h2 { font-size: 16px; }
+    .card-head p { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+    .grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
+
+    /* ---------- Tablas ---------- */
+    .search { height: 38px; padding: 0 12px 0 34px; border: 1px solid var(--line); border-radius: 10px; width: 220px; outline: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7486' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 11px center; }
+    .search:focus { border-color: var(--primary); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; padding: 10px 12px; background: #f8f9fc; border-bottom: 1px solid var(--line); }
+    th:first-child { border-radius: 8px 0 0 8px; } th:last-child { border-radius: 0 8px 8px 0; }
+    td { padding: 12px; border-bottom: 1px solid var(--line); }
+    tbody tr:hover { background: #fafbff; }
+    tbody tr:last-child td { border-bottom: none; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .strong { font-weight: 600; }
+    .muted { color: var(--muted); }
+    .pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .pill-ok { background: var(--ok-soft); color: var(--ok); }
+    .pill-warn { background: var(--warn-soft); color: var(--warn); }
+    .pill-danger { background: var(--danger-soft); color: var(--danger); }
+    .cell-user { display: flex; align-items: center; gap: 10px; }
+    .mini-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary-soft); color: var(--primary-dark); display: grid; place-items: center; font-weight: 700; font-size: 12px; }
+    .empty { text-align: center; color: var(--muted); padding: 34px 12px; }
+
+    /* ---------- Venta ---------- */
+    .row { display: grid; grid-template-columns: 1fr 110px auto; gap: 10px; align-items: end; }
+    .row .field { margin-bottom: 0; }
+    .cart { margin: 16px 0; border: 1px dashed var(--line); border-radius: 12px; min-height: 90px; }
+    .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    .cart-item:last-child { border-bottom: none; }
+    .totales { background: #f8f9fc; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; }
+    .totales div { display: flex; justify-content: space-between; padding: 4px 0; color: var(--muted); }
+    .totales .total { color: var(--text); font-weight: 700; font-size: 18px; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; }
+
+    /* ---------- Toast ---------- */
+    #toast { position: fixed; right: 24px; bottom: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+    .toast { background: var(--side); color: #fff; padding: 12px 16px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.2); display: flex; gap: 10px; align-items: center; animation: entrar .25s ease; max-width: 340px; }
+    .toast .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    @keyframes entrar { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 1100px) { .stats { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 820px) {
+      .login { grid-template-columns: 1fr; } .login-brand { display: none; }
+      .layout { grid-template-columns: 1fr; } aside { flex-direction: row; overflow-x: auto; padding: 10px; }
+      aside .logo, .nav-label, .side-footer { display: none; } nav { display: flex; gap: 4px; } nav button { margin: 0; white-space: nowrap; }
+      .topbar, main { padding-left: 16px; padding-right: 16px; } .search { width: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ================= LOGIN ================= -->
+  <section class="login" id="vista-login">
+    <div class="login-brand">
+      <div class="logo">
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg></div>
+        VentasPro
+      </div>
+      <div>
+        <h2>Gestiona tus ventas en un solo lugar.</h2>
+        <p>Productos, clientes y ventas con cálculo automático de IVA y control de stock.</p>
+      </div>
+      <small>Componente Práctico 2 · Gestión de la Configuración de Software · UNEMI</small>
+    </div>
+    <div class="login-form-wrap">
+      <form class="login-form" onsubmit="iniciarSesion(event)">
+        <h1>Bienvenido</h1>
+        <p class="sub">Ingresa tus credenciales para continuar</p>
+        <div class="field"><label for="usuario">Usuario</label><input id="usuario" autocomplete="username" required></div>
+        <div class="field"><label for="clave">Contraseña</label><input id="clave" type="password" autocomplete="current-password" required></div>
+        <button class="btn btn-primary btn-block" type="submit">Iniciar sesión</button>
+        <div class="error-text" id="error-login"></div>
+        <div class="hint">Usuario de prueba: <b>admin</b> · Contraseña: <b>admin123</b></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= APP ================= -->
+  <div class="layout oculto" id="vista-app">
+    <aside>
+      <div class="logo">
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg></div>
+        VentasPro
+      </div>
+      <div class="nav-label">Menú</div>
+      <nav>
+        <button data-vista="panel" class="activo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panel</button>
+        <button data-vista="productos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Productos</button>
+        <button data-vista="clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg>Clientes</button>
+        <button data-vista="ventas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>Nueva venta</button>
+      </nav>
+      <div class="side-footer">IVA aplicado: 15 %</div>
+    </aside>
+
+    <div class="content">
+      <header class="topbar">
+        <div><h1 id="titulo">Panel</h1><div class="sub" id="subtitulo">Resumen general del negocio</div></div>
+        <div class="user">
+          <span class="badge-version" id="version">v—</span>
+          <div class="avatar" id="avatar">A</div>
+          <div><div class="user-name" id="nombre-usuario">—</div><button class="logout" onclick="cerrarSesion()">Cerrar sesión</button></div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Panel -->
+        <section data-seccion="panel">
+          <div class="stats">
+            <div class="stat"><div class="stat-icon i-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="valor" id="st-total">$0.00</div><div class="etiqueta">Total vendido</div></div></div>
+            <div class="stat"><div class="stat-icon i-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 2-1.6L21 8H6"/></svg></div><div><div class="valor" id="st-ventas">0</div><div class="etiqueta">Ventas realizadas</div></div></div>
+            <div class="stat"><div class="stat-icon i-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/></svg></div><div><div class="valor" id="st-productos">0</div><div class="etiqueta">Productos</div></div></div>
+            <div class="stat"><div class="stat-icon i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/></svg></div><div><div class="valor" id="st-clientes">0</div><div class="etiqueta">Clientes</div></div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><div><h2>Últimas ventas</h2><p>Registro de las ventas más recientes</p></div><button class="btn btn-light" onclick="irA('ventas')">+ Nueva venta</button></div>
+              <div class="table-wrap"><table><thead><tr><th>#</th><th>Cliente</th><th>Productos</th><th class="num">Total</th></tr></thead><tbody id="tabla-ventas"></tbody></table></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div><h2>Stock bajo</h2><p>Productos con 10 unidades o menos</p></div></div>
+              <div class="table-wrap"><table><thead><tr><th>Producto</th><th class="num">Stock</th></tr></thead><tbody id="tabla-stock"></tbody></table></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Productos -->
+        <section data-seccion="productos" class="oculto">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><div><h2>Catálogo de productos</h2><p id="cuenta-productos"></p></div><input class="search" placeholder="Buscar producto..." oninput="pintarProductos(this.value)"></div>
+              <div class="table-wrap"><table><thead><tr><th>ID</th><th>Producto</th><th class="num">Precio</th><th class="num">Stock</th><th>Estado</th></tr></thead><tbody id="tabla-productos"></tbody></table></div>
+            </div>
+            <form class="card" onsubmit="crearProducto(event)">
+              <div class="card-head"><div><h2>Nuevo producto</h2><p>Agrega un producto al catálogo</p></div></div>
+              <div class="field"><label>Nombre</label><input id="p-nombre" placeholder="Ej. Audífonos" required></div>
+              <div class="field"><label>Precio (USD)</label><input id="p-precio" type="number" step="0.01" min="0.01" placeholder="0.00" required></div>
+              <div class="field"><label>Stock inicial</label><input id="p-stock" type="number" min="0" step="1" placeholder="0" required></div>
+              <button class="btn btn-primary btn-block" type="submit">Guardar producto</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Clientes -->
+        <section data-seccion="clientes" class="oculto">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><div><h2>Clientes registrados</h2><p id="cuenta-clientes"></p></div><input class="search" placeholder="Buscar cliente..." oninput="pintarClientes(this.value)"></div>
+              <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Cédula</th><th>Email</th></tr></thead><tbody id="tabla-clientes"></tbody></table></div>
+            </div>
+            <form class="card" onsubmit="crearCliente(event)">
+              <div class="card-head"><div><h2>Nuevo cliente</h2><p>La cédula debe tener 10 dígitos</p></div></div>
+              <div class="field"><label>Nombre completo</label><input id="c-nombre" placeholder="Ej. Ana Torres" required></div>
+              <div class="field"><label>Cédula</label><input id="c-cedula" placeholder="0912345678" maxlength="10" required></div>
+              <div class="field"><label>Email (opcional)</label><input id="c-email" type="email" placeholder="ana@correo.com"></div>
+              <button class="btn btn-primary btn-block" type="submit">Guardar cliente</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Nueva venta -->
+        <section data-seccion="ventas" class="oculto">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><div><h2>Detalle de la venta</h2><p>Agrega uno o varios productos</p></div></div>
+              <div class="field"><label>Cliente</label><select id="v-cliente"></select></div>
+              <div class="row">
+                <div class="field"><label>Producto</label><select id="v-producto"></select></div>
+                <div class="field"><label>Cantidad</label><input id="v-cantidad" type="number" value="1" min="1"></div>
+                <button class="btn btn-light" onclick="agregarAlCarrito()" type="button">Agregar</button>
+              </div>
+              <div class="cart" id="carrito"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div><h2>Resumen</h2><p>Valores calculados con IVA 15 %</p></div></div>
+              <div class="totales">
+                <div><span>Subtotal</span><span id="r-subtotal">$0.00</span></div>
+                <div><span>IVA (15 %)</span><span id="r-iva">$0.00</span></div>
+                <div class="total"><span>Total</span><span id="r-total">$0.00</span></div>
+              </div>
+              <button class="btn btn-primary btn-block" onclick="registrarVenta()">Registrar venta</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const dinero = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const iniciales = (n) => String(n).split(' ').filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('');
+    const IVA = 0.15;
+
+    let datos = { productos: [], clientes: [], ventas: [] };
+    let carrito = [];
+
+    const vistas = {
+      panel: ['Panel', 'Resumen general del negocio'],
+      productos: ['Productos', 'Administra el catálogo y el stock'],
+      clientes: ['Clientes', 'Registro de clientes'],
+      ventas: ['Nueva venta', 'Registra una venta y calcula el total']
+    };
+
+    async function api(url, metodo = 'GET', cuerpo) {
+      const res = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json' }, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || (json.errores || []).join(', '));
+      return json;
+    }
+
+    function aviso(texto, tipo = 'ok') {
+      const color = { ok: '#22c55e', error: '#ef4444' }[tipo];
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.innerHTML = `<span class="dot" style="background:${color}"></span><span>${esc(texto)}</span>`;
+      $('toast').appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+
+    // ---------- Sesión ----------
+    async function iniciarSesion(e) {
+      e.preventDefault();
+      try {
+        const r = await api('/api/auth/login', 'POST', { usuario: $('usuario').value.trim(), clave: $('clave').value });
+        sessionStorage.setItem('usuario', JSON.stringify(r.usuario));
+        entrar(r.usuario);
+      } catch (err) { $('error-login').textContent = err.message; }
+    }
+
+    function entrar(usuario) {
+      $('vista-login').classList.add('oculto');
+      $('vista-app').classList.remove('oculto');
+      $('nombre-usuario').textContent = usuario.nombre;
+      $('avatar').textContent = iniciales(usuario.nombre);
+      cargarTodo();
+    }
+
+    function cerrarSesion() {
+      sessionStorage.removeItem('usuario');
+      location.reload();
+    }
+
+    // ---------- Navegación ----------
+    function irA(vista) {
+      document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('activo', b.dataset.vista === vista));
+      document.querySelectorAll('[data-seccion]').forEach((s) => s.classList.toggle('oculto', s.dataset.seccion !== vista));
+      $('titulo').textContent = vistas[vista][0];
+      $('subtitulo').textContent = vistas[vista][1];
+    }
+    document.querySelectorAll('nav button').forEach((b) => b.addEventListener('click', () => irA(b.dataset.vista)));
+
+    // ---------- Datos ----------
+    async function cargarTodo() {
+      const [productos, clientes, ventas] = await Promise.all([api('/api/productos'), api('/api/clientes'), api('/api/ventas')]);
+      datos = { productos, clientes, ventas };
+      pintarPanel(); pintarProductos(); pintarClientes(); pintarSelects(); pintarCarrito();
+    }
+
+    function estadoStock(stock) {
+      if (stock === 0) return '<span class="pill pill-danger">Agotado</span>';
+      if (stock <= 10) return '<span class="pill pill-warn">Stock bajo</span>';
+      return '<span class="pill pill-ok">Disponible</span>';
+    }
+
+    function pintarPanel() {
+      const { productos, clientes, ventas } = datos;
+      $('st-total').textContent = dinero(ventas.reduce((s, v) => s + v.total, 0));
+      $('st-ventas').textContent = ventas.length;
+      $('st-productos').textContent = productos.length;
+      $('st-clientes').textContent = clientes.length;
+
+      $('tabla-ventas').innerHTML = ventas.length
+        ? ventas.slice().reverse().slice(0, 6).map((v) => `<tr><td class="muted">#${v.id}</td><td><div class="cell-user"><div class="mini-avatar">${esc(iniciales(v.cliente.nombre))}</div>${esc(v.cliente.nombre)}</div></td><td class="muted">${v.detalle.map((d) => `${d.cantidad} × ${esc(d.nombre)}`).join(', ')}</td><td class="num strong">${dinero(v.total)}</td></tr>`).join('')
+        : '<tr><td colspan="4" class="empty">Aún no hay ventas registradas</td></tr>';
+
+      const bajos = productos.filter((p) => p.stock <= 10);
+      $('tabla-stock').innerHTML = bajos.length
+        ? bajos.map((p) => `<tr><td>${esc(p.nombre)}</td><td class="num">${estadoStock(p.stock)} <b>${p.stock}</b></td></tr>`).join('')
+        : '<tr><td colspan="2" class="empty">Todo el stock está en orden</td></tr>';
+    }
+
+    function pintarProductos(filtro = '') {
+      const lista = datos.productos.filter((p) => p.nombre.toLowerCase().includes(filtro.toLowerCase()));
+      $('cuenta-productos').textContent = `${datos.productos.length} productos en el catálogo`;
+      $('tabla-productos').innerHTML = lista.length
+        ? lista.map((p) => `<tr><td class="muted">${p.id}</td><td class="strong">${esc(p.nombre)}</td><td class="num">${dinero(p.precio)}</td><td class="num">${p.stock}</td><td>${estadoStock(p.stock)}</td></tr>`).join('')
+        : '<tr><td colspan="5" class="empty">No se encontraron productos</td></tr>';
+    }
+
+    function pintarClientes(filtro = '') {
+      const f = filtro.toLowerCase();
+      const lista = datos.clientes.filter((c) => c.nombre.toLowerCase().includes(f) || c.cedula.includes(f));
+      $('cuenta-clientes').textContent = `${datos.clientes.length} clientes registrados`;
+      $('tabla-clientes').innerHTML = lista.length
+        ? lista.map((c) => `<tr><td><div class="cell-user"><div class="mini-avatar">${esc(iniciales(c.nombre))}</div><span class="strong">${esc(c.nombre)}</span></div></td><td>${esc(c.cedula)}</td><td class="muted">${esc(c.email) || '—'}</td></tr>`).join('')
+        : '<tr><td colspan="3" class="empty">No se encontraron clientes</td></tr>';
+    }
+
+    function pintarSelects() {
+      $('v-cliente').innerHTML = datos.clientes.map((c) => `<option value="${c.id}">${esc(c.nombre)} · ${esc(c.cedula)}</option>`).join('');
+      $('v-producto').innerHTML = datos.productos.map((p) => `<option value="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>${esc(p.nombre)} — ${dinero(p.precio)} (stock ${p.stock})</option>`).join('');
+    }
+
+    async function crearProducto(e) {
+      e.preventDefault();
+      try {
+        const p = await api('/api/productos', 'POST', { nombre: $('p-nombre').value, precio: parseFloat($('p-precio').value), stock: parseInt($('p-stock').value, 10) });
+        e.target.reset(); aviso(`Producto "${p.nombre}" guardado`); cargarTodo();
+      } catch (err) { aviso(err.message, 'error'); }
+    }
+
+    async function crearCliente(e) {
+      e.preventDefault();
+      try {
+        const c = await api('/api/clientes', 'POST', { nombre: $('c-nombre').value, cedula: $('c-cedula').value.trim(), email: $('c-email').value.trim() });
+        e.target.reset(); aviso(`Cliente "${c.nombre}" guardado`); cargarTodo();
+      } catch (err) { aviso(err.message, 'error'); }
+    }
+
+    // ---------- Venta ----------
+    function agregarAlCarrito() {
+      const id = Number($('v-producto').value);
+      const cantidad = parseInt($('v-cantidad').value, 10);
+      const producto = datos.productos.find((p) => p.id === id);
+      if (!producto) return aviso('Selecciona un producto', 'error');
+      if (!cantidad || cantidad < 1) return aviso('La cantidad debe ser mayor a 0', 'error');
+      const existente = carrito.find((i) => i.productoId === id);
+      const nuevaCantidad = (existente ? existente.cantidad : 0) + cantidad;
+      if (nuevaCantidad > producto.stock) return aviso(`Solo hay ${producto.stock} unidades de ${producto.nombre}`, 'error');
+      if (existente) existente.cantidad = nuevaCantidad;
+      else carrito.push({ productoId: id, nombre: producto.nombre, precio: producto.precio, cantidad });
+      $('v-cantidad').value = 1;
+      pintarCarrito();
+    }
+
+    function quitarDelCarrito(id) {
+      carrito = carrito.filter((i) => i.productoId !== id);
+      pintarCarrito();
+    }
+
+    function pintarCarrito() {
+      $('carrito').innerHTML = carrito.length
+        ? carrito.map((i) => `<div class="cart-item"><div><div class="strong">${esc(i.nombre)}</div><div class="muted">${i.cantidad} × ${dinero(i.precio)}</div></div><div style="display:flex;align-items:center;gap:10px"><b>${dinero(i.cantidad * i.precio)}</b><button class="btn-icon" title="Quitar" onclick="quitarDelCarrito(${i.productoId})">✕</button></div></div>`).join('')
+        : '<div class="empty">El carrito está vacío</div>';
+      const subtotal = Math.round(carrito.reduce((s, i) => s + i.precio * i.cantidad, 0) * 100) / 100;
+      const iva = Math.round(subtotal * IVA * 100) / 100;
+      $('r-subtotal').textContent = dinero(subtotal);
+      $('r-iva').textContent = dinero(iva);
+      $('r-total').textContent = dinero(subtotal + iva);
+    }
+
+    async function registrarVenta() {
+      if (!carrito.length) return aviso('Agrega al menos un producto', 'error');
+      try {
+        const v = await api('/api/ventas', 'POST', { clienteId: Number($('v-cliente').value), items: carrito.map(({ productoId, cantidad }) => ({ productoId, cantidad })) });
+        carrito = [];
+        aviso(`Venta #${v.id} registrada · Total ${dinero(v.total)}`);
+        await cargarTodo();
+        irA('panel');
+      } catch (err) { aviso(err.message, 'error'); }
+    }
+
+    // ---------- Inicio ----------
+    api('/api/health').then((r) => { $('version').textContent = 'v' + r.version; }).catch(() => {});
+    const guardado = sessionStorage.getItem('usuario');
+    if (guardado) entrar(JSON.parse(guardado));
+  </script>
+</body>
+</html>

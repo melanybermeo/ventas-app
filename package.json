@@ -1,0 +1,17 @@
+{
+  "name": "ventas-app",
+  "version": "1.0.0",
+  "description": "Sistema de ventas sencillo (Componente Práctico 2 - Gestión de la Configuración de Software, UNEMI)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "license": "MIT"
+}
