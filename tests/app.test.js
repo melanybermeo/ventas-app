@@ -7,7 +7,7 @@ describe('Pruebas automatizadas del Sistema de Ventas (ventas-app)', () => {
   test('1. GET /api/health debe responder con estado ok y versión', async () => {
     const res = await request(app).get('/api/health');
     expect(res.statusCode).toBe(200);
-    expect(res.body.estado).toBe('fallo_intencional');
+    expect(res.body.estado).toBe('ok');
   });
 
   test('2. POST /api/auth/login debe autenticar con credenciales válidas', async () => {
