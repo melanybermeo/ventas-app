@@ -5,6 +5,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+- Workflow de CI/CD con GitHub Actions: pruebas, build, artefacto descargable y despliegue automático en Render (Básica y Premium).
+
 ### Agregado
 - (Cada integrante agrega aquí lo que integra en develop.)
 

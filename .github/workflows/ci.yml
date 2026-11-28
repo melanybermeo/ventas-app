@@ -1,0 +1,66 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  # ---------- Integración continua ----------
+  test:
+    name: Construir y probar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el código (checkout)
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar pruebas automatizadas
+        run: npm test
+
+      - name: Construir paquete (build)
+        run: |
+          mkdir -p dist/ventas-app
+          cp -r src public package.json package-lock.json dist/ventas-app/
+          tar -czf dist/ventas-app-${{ github.sha }}.tar.gz -C dist ventas-app
+
+      - name: Subir artefacto descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ventas-app-build
+          path: dist/ventas-app-${{ github.sha }}.tar.gz
+          retention-days: 14
+
+  # ---------- Despliegue continuo ----------
+  deploy:
+    name: Desplegar variante ${{ matrix.variante }}
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variante: basica
+            hook: RENDER_DEPLOY_HOOK_BASICA
+          - variante: premium
+            hook: RENDER_DEPLOY_HOOK_PREMIUM
+    steps:
+      - name: Disparar deploy hook de Render (${{ matrix.variante }})
+        env:
+          HOOK_BASICA: ${{ secrets.RENDER_DEPLOY_HOOK_BASICA }}
+          HOOK_PREMIUM: ${{ secrets.RENDER_DEPLOY_HOOK_PREMIUM }}
+        run: |
+          if [ "${{ matrix.variante }}" = "basica" ]; then HOOK="$HOOK_BASICA"; else HOOK="$HOOK_PREMIUM"; fi
+          if [ -z "$HOOK" ]; then echo "::error::Falta el secret del deploy hook"; exit 1; fi
+          curl --fail --silent --show-error -X POST "$HOOK"
+          echo "Despliegue de la variante ${{ matrix.variante }} solicitado a Render"
